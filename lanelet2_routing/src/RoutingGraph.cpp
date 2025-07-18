@@ -325,6 +325,26 @@ std::vector<OutVertexT> reachableSetImpl(const GraphType::vertex_descriptor& sta
   return result;
 }
 
+template <bool Backw, typename OutVertexT, typename GraphT, typename Func>
+std::vector<std::pair<OutVertexT, double>> reachableSetWithCostsImpl(const GraphType::vertex_descriptor& start,
+                                                                     const FilteredRoutingGraph& graph,
+                                                                     Func stopCriterion) {
+  auto g = GetGraph<Backw>{}(graph);
+  DijkstraStyleSearch<decltype(g)> search(g);
+  search.query(start, stopCriterion);
+
+  std::vector<std::pair<OutVertexT, double>> result;
+  result.reserve(search.getMap().size());
+
+  for (const auto& vertex : search.getMap()) {
+    if (vertex.second.predicate) {
+      result.emplace_back(static_cast<OutVertexT>(graph[vertex.first].laneletOrArea), vertex.second.cost);
+    }
+  }
+
+  return result;
+}
+
 template <typename PathT, typename PrimT>
 Optional<PathT> shortestPathImpl(const PrimT& from, const PrimT& to, RoutingCostId routingCostId, bool withLaneChanges,
                                  bool withAreas, const internal::RoutingGraphGraph& graph) {
@@ -579,6 +599,16 @@ ConstLanelets RoutingGraph::reachableSet(const ConstLanelet& lanelet, double max
   }
   auto graph = allowLaneChanges ? graph_->withLaneChanges(routingCostId) : graph_->withoutLaneChanges(routingCostId);
   return reachableSetImpl<false, ConstLanelet>(*start, graph, StopIfCostMoreThan<true>{maxRoutingCost});
+}
+
+std::vector<std::pair<ConstLanelet, double>> RoutingGraph::reachableSetWithCosts(
+  const ConstLanelet& lanelet, double maxRoutingCost, RoutingCostId routingCostId, bool allowLaneChanges) const {
+  auto start = graph_->getVertex(lanelet);
+  if (!start) {
+    return {};
+  }
+  auto graph = allowLaneChanges ? graph_->withLaneChanges(routingCostId) : graph_->withoutLaneChanges(routingCostId);
+  return reachableSetWithCostsImpl<false, ConstLanelet, FilteredRoutingGraph>(*start, static_cast<const FilteredRoutingGraph&>(graph), StopIfCostMoreThan<true>{maxRoutingCost});
 }
 
 ConstLaneletOrAreas RoutingGraph::reachableSetIncludingAreas(const ConstLaneletOrArea& llOrAr, double maxRoutingCost,

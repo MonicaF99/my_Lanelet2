@@ -1,4 +1,5 @@
 ﻿#pragma once
+#warning "Using modified RoutingGraph.h"
 #include <lanelet2_core/Forward.h>
 #include <lanelet2_core/LaneletMap.h>
 #include <lanelet2_core/primitives/Lanelet.h>
@@ -321,6 +322,8 @@ class RoutingGraph {
   //! Retrieve set of lanelet or areas that are reachable without exceeding routing cost.
   ConstLaneletOrAreas reachableSetIncludingAreas(const ConstLaneletOrArea& llOrAr, double maxRoutingCost,
                                                  RoutingCostId routingCostId = {}) const;
+  
+  std::vector<std::pair<ConstLanelet, double>> reachableSetWithCosts(const ConstLanelet& lanelet, double maxRoutingCost, RoutingCostId routingCostId, bool allowLaneChanges) const;
 
   /** @brief Retrieve a set of lanelets that can reach a given lanelet
    *
