@@ -1,5 +1,5 @@
 ﻿#pragma once
-#warning "Using modified RoutingGraph.h"
+//#warning "Using modified RoutingGraph.h"
 #include <lanelet2_core/Forward.h>
 #include <lanelet2_core/LaneletMap.h>
 #include <lanelet2_core/primitives/Lanelet.h>
@@ -323,7 +323,39 @@ class RoutingGraph {
   ConstLaneletOrAreas reachableSetIncludingAreas(const ConstLaneletOrArea& llOrAr, double maxRoutingCost,
                                                  RoutingCostId routingCostId = {}) const;
   
+  /**
+  * @brief Retrieve reachable lanelets with cost information.
+  * 
+  * @param lanelet Start lanelet
+  * @param maxRoutingCost Maximum allowed cost
+  * @param routingCostId Cost evaluation ID
+  * @param allowLaneChanges Whether to allow lane changes
+  * @return Vector of lanelets and their associated cost
+  * 
+  * @author Monica Fossati
+  * @ingroup CustomReachabilityExtensions
+  * @note Custom extension to expose costs for reachable lanelets.
+  */
   std::vector<std::pair<ConstLanelet, double>> reachableSetWithCosts(const ConstLanelet& lanelet, double maxRoutingCost, RoutingCostId routingCostId, bool allowLaneChanges) const;
+  
+  /**
+  * @brief Retrieve reachable lanelets or areas with cost information.
+  * 
+  * Computes the set of reachable `Lanelet` or `Area` elements from a given starting point,
+  * while also returning the associated routing cost for each.
+  * 
+  * @param llOrAr Starting lanelet or area
+  * @param maxRoutingCost Maximum routing cost threshold
+  * @param routingCostId Optional routing cost evaluation ID (default: 0)
+  * @return Vector of reachable lanelets or areas with their corresponding cost
+  * 
+  * @author Monica Fossati
+  * @ingroup CustomReachabilityExtensions
+  * @note Custom extension to expose reachability across areas with cost evaluation.
+  */
+  std::vector<std::pair<ConstLaneletOrArea, double>> reachableSetIncludingAreasWithCosts(const ConstLaneletOrArea& llOrAr, double maxRoutingCost,
+    RoutingCostId routingCostId = {}) const;
+
 
   /** @brief Retrieve a set of lanelets that can reach a given lanelet
    *

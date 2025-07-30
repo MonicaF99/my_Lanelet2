@@ -621,6 +621,16 @@ ConstLaneletOrAreas RoutingGraph::reachableSetIncludingAreas(const ConstLaneletO
   return reachableSetImpl<false, ConstLaneletOrArea>(*start, graph, StopIfCostMoreThan<true>{maxRoutingCost});
 }
 
+std::vector<std::pair<ConstLaneletOrArea, double>> RoutingGraph::reachableSetIncludingAreasWithCosts(const ConstLaneletOrArea& llOrAr, double maxRoutingCost,
+  RoutingCostId routingCostId) const {
+auto start = graph_->getVertex(llOrAr);
+if (!start) {
+return {};
+}
+auto graph = graph_->withAreasAndLaneChanges(routingCostId);
+return reachableSetWithCostsImpl<false, ConstLaneletOrArea, FilteredRoutingGraph>(*start, graph, StopIfCostMoreThan<true>{maxRoutingCost});
+}
+
 ConstLanelets RoutingGraph::reachableSetTowards(const ConstLanelet& lanelet, double maxRoutingCost,
                                                 RoutingCostId routingCostId, bool allowLaneChanges) const {
   auto start = graph_->getVertex(lanelet);
